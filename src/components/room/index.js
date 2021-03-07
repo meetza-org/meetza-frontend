@@ -211,11 +211,6 @@ export default class Main extends Component{
         this.myPeerConnection = new RTCPeerConnection({
             iceServers: [     // Information about ICE servers - Use your own!
               {
-                urls: `stun:${process.env.REACT_APP_COTURN_URL}`,
-                username: `${process.env.REACT_APP_COTURN_USERNAME}`,
-                credential: `${process.env.REACT_APP_COTURN_PASSWORD}`
-              },
-              {
                 urls: `turn:${process.env.REACT_APP_COTURN_URL}`,
                 username: `${process.env.REACT_APP_COTURN_USERNAME}`,
                 credential: `${process.env.REACT_APP_COTURN_PASSWORD}`
