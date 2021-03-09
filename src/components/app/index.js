@@ -36,7 +36,8 @@ const PrivateRoute = ({ component: Component, ...rest }) => (
 );
 
 class App extends Component {
-  componentDidMount(){
+  constructor(props){
+    super(props);
     console.log("Connecting to Socket");
     const socket = createWebSocketConnection('room');
     console.log("Before On");

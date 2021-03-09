@@ -8,6 +8,8 @@ const mapStateToProps = state => ({
   userEmailId: state.user.userEmailId,
   isUserLoggedIn: state.user.isUserLoggedIn,
   firstName: state.user.firstName,
+  roomCreated: state.room.roomCreated,
+  roomId: state.room.roomId,
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({ ...SocketActions }, dispatch);

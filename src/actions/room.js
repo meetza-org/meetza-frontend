@@ -1,14 +1,14 @@
 import { RSAA } from 'redux-api-middleware';
 import ROOM from '../action_types/room';
 
-export const initializeRoom = () => ({
+export const getRoomPermissions = roomId => ({
     [RSAA] : {
-        endpoint: 'room/initialize',
+        endpoint: `room/permissions?roomId=${roomId}`,
         method: 'GET',
         types: [
-            ROOM.INITIALIZE_ROOM.LOAD,
-            ROOM.INITIALIZE_ROOM.SUCCESS,
-            ROOM.INITIALIZE_ROOM.FAIL
+            ROOM.PERMISSIONS.LOAD,
+            ROOM.PERMISSIONS.SUCCESS,
+            ROOM.PERMISSIONS.FAIL
         ]
     }
 });

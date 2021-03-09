@@ -1,5 +1,6 @@
 import { takeEvery, call, fork, put, take, select } from 'redux-saga/effects'
 import SOCKET from '../action_types/socket';
+import ROOM from '../action_types/room'
 import { eventChannel } from 'redux-saga'
 
     function createSocketChannel(socket) {
@@ -75,6 +76,30 @@ import { eventChannel } from 'redux-saga'
             }
             case "new-ice-candidate": {
                 yield put({ type: SOCKET.NEW_ICE_CANDIDATE.SUCCESS, payload })
+                break;
+            }
+            case "room-created": {
+                yield put({ type: ROOM.INITIALIZE_ROOM.SUCCESS, payload })
+                break;
+            }
+            case "started-meeting":{
+                yield put({ type: ROOM.MEETING_STARTED.SUCCESS, payload })
+                break;
+            }
+            case "joined-room":{
+                yield put({ type: ROOM.JOINED_ROOM.SUCCESS, payload })
+                break;
+            }
+            case "join-request":{
+                yield put({ type: ROOM.JOIN_REQUEST.SUCCESS, payload })
+                break;
+            }
+            case "accept-or-reject":{
+                yield put({ type: ROOM.ACCEPT_REJECT.SUCCESS, payload })
+                break;
+            }
+            case "close-meeting":{
+                yield put({ type: ROOM.CLOSE_MEETING.SUCCESS, payload })
                 break;
             }
             default:{

@@ -3,12 +3,15 @@ import styled from 'styled-components';
 import {Link} from 'react-router-dom'
 
 const HeaderStyle = styled.div`
-    background-color: #f9f9f9;
-    border-bottom: 1px solid #e6e6e6;
-    box-shadow: 0px -4px 15px 0px #797979;
     z-index: 2;
     position: sticky !important;
     top: 0px !important;
+
+    .logo{
+        color: #2bb3d2 !important;
+        font-size: 23px;
+        font-weight: 500;
+    }
 `;
 
 export default class Header extends Component{
@@ -16,7 +19,7 @@ export default class Header extends Component{
         return(
             <HeaderStyle className="row navbar navbar-expand-lg navbar-light">
                 <div className="col-1">
-                    <Link className="navbar-brand" to="/">Meetza</Link>
+                    <Link className="navbar-brand logo" to="/">Meetza</Link>
                 </div>
                 <div className="col-8"></div>
                 <div className="col-4"></div>
