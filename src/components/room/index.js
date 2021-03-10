@@ -419,6 +419,9 @@ export default class Main extends Component{
 
     handleNewICECandidateMsg = ({emailId, candidate}) => {
       let newCandidate = new RTCIceCandidate(candidate);
+      console.log("####################### New ICE Candidate ##########################");
+      console.log(newCandidate);
+      console.log("####################### New ICE Candidate ##########################");
       this.myPeerConnections[emailId].addIceCandidate(newCandidate)
         .catch(() => console.log("!!!!!!!!!!!!!!!!! ICE ERROR !!!!!!!!!!!!!!!!!!!!!"));
     }
