@@ -45,6 +45,10 @@ export default class Header extends Component{
         window.location.href = "/login";
     }
 
+    login = () => {
+        window.location.href = "/login";
+    }
+
     render(){
         return(
             <HeaderStyle className="row navbar navbar-expand-lg navbar-light">
@@ -53,12 +57,12 @@ export default class Header extends Component{
                 </div>
                 <div className="col-9"></div>
                 <div className="col-2 github-link">
-                    <a href="https://github.com/meetza-org" target="_blank">
-                        <img src="/images/GitHub-Mark-120px-plus.png" />
+                    <a href="https://github.com/meetza-org" target="_blank" rel="noopener noreferrer">
+                        <img src="/images/GitHub-Mark-120px-plus.png" alt="Github URL" />
                     </a>
                     {this.props.isUserLoggedIn ? (
                         <div className="logout-button" onClick={this.clearDataAndRedirectToLogin}>Logout</div>
-                    ): null}
+                    ): (window.location.pathname !== "/login" ? <div className="logout-button" onClick={this.login}>Login</div> : null)}
                 </div>
                     
             </HeaderStyle>

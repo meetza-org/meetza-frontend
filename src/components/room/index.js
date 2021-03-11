@@ -6,6 +6,8 @@ import * as R from 'ramda';
 import { Spinner } from '../common'
 import NotificationSystem from 'react-notification-system';
 
+const COMMMON_PEER_CONNECTION = "__common__";
+
 const style = {
   NotificationItem: { // Override the notification item
     DefaultStyle: { // Applied to every notification, regardless of the notification level
@@ -187,7 +189,6 @@ const ShareScreenButton = ({onClick, isMuted}) =>
 
 
 const ActionButtons = ({handleMuteUnmute, mediaConstraints, closeVideoCall, showHangup, handleScreenShare, isScreenShared}) => {
-  debugger;
   return (
     <div className="inline-flex">
       <AudioButton onClick={() => handleMuteUnmute("audio")} isMuted={!mediaConstraints.audio}></AudioButton>
@@ -365,7 +366,6 @@ export default class Main extends Component{
     }
 
     createPeerConnection = emailId => {
-      let {remoteVideoList} = this.state;
       this.myPeerConnections[emailId] = new RTCPeerConnection({
           iceServers: [
             {
@@ -375,6 +375,14 @@ export default class Main extends Component{
             }
           ]
       });
+      this.localStream.getTracks().forEach(track => {
+        this.myPeerConnections[emailId].sender = this.myPeerConnections[emailId].addTrack(track, this.localStream);
+      });
+      this.addPeerConnectionEvents(emailId);
+    }
+
+    addPeerConnectionEvents = emailId => {
+      let {remoteVideoList} = this.state;
       this.myPeerConnections[emailId].onicecandidate = this.handleICECandidateEvent;
       this.myPeerConnections[emailId].ontrack = event => this.handleTrackEvent(emailId, event);
       this.myPeerConnections[emailId].onnegotiationneeded = () => this.handleNegotiationNeededEvent(emailId);
@@ -383,19 +391,15 @@ export default class Main extends Component{
       //this.myPeerConnections[emailId].oniceconnectionstatechange = this.handleICEConnectionStateChangeEvent;
       //this.myPeerConnections[emailId].onicegatheringstatechange = this.handleICEGatheringStateChangeEvent;
       //this.myPeerConnections[emailId].onsignalingstatechange = this.handleSignalingStateChangeEvent;
-      this.localStream.getTracks().forEach(track => {
-        this.myPeerConnections[emailId].sender = this.myPeerConnections[emailId].addTrack(track, this.localStream);
-      });
       remoteVideoList[emailId] = React.createRef()
       this.setState({
         remoteVideoList: remoteVideoList
       })
     }
 
-    handleInvitationAccepted = ({emailId}) => {
-      debugger;
+    handleInvitationAccepted = () => {
       const { roomId } = this.state;
-      this.createPeerConnection(emailId);
+      this.createPeerConnection(COMMMON_PEER_CONNECTION);
       this.props.sendSignal({
         roomId: roomId,
         type: "join-room",
@@ -406,12 +410,10 @@ export default class Main extends Component{
       this.startLocalStream();
     }
 
-    handleInvitationRejected = () => {
-
-    }
-
     handleVideoAnswerMsg = ({emailId, sdp}) => {   
       console.log("############### Video Answer Room ######################");
+      this.myPeerConnections[emailId] = this.myPeerConnections[COMMMON_PEER_CONNECTION];
+      this.addPeerConnectionEvents(emailId);
       var desc = new RTCSessionDescription(sdp);
       this.myPeerConnections[emailId].setRemoteDescription(desc)
       .catch(() => console.log("!!!!!!!!!!!!!!!!! VIDEO ANSWER ERROR !!!!!!!!!!!!!!!!!!!!!"));
@@ -543,7 +545,7 @@ export default class Main extends Component{
         this.myPeerConnections[emailId].onicegatheringstatechange = null;
         this.myPeerConnections[emailId].onnegotiationneeded = null;
     
-        if (this.state.remoteVideoList[emailId].current.srcObject) {
+        if (this.state.remoteVideoList[emailId].current !=null && this.state.remoteVideoList[emailId].current.srcObject) {
           this.state.remoteVideoList[emailId].current.srcObject.getTracks().forEach(track => track.stop());
           this.state.remoteVideoList[emailId] = null
         }
@@ -581,9 +583,6 @@ export default class Main extends Component{
         this.acceptOrReject = props.acceptOrReject;
         if(props.acceptOrReject.action === "Accepted"){
           this.handleInvitationAccepted(props.acceptOrReject)
-        }
-        else{
-          this.handleInvitationRejected();
         }
       }
       if(props.isMeetingClosed !== this.isMeetingClosed){
@@ -635,11 +634,14 @@ export default class Main extends Component{
       if(this.primaryRemoteVideoSrc.current && this.primaryRemoteVideoSrc.current.name === key){
         display = "none";
       }
-      return (
-        <div key={key} className="col-2">
-          <video id="received_video" style={{display: display}} onClick={() => this.handleVideoClick(key)} ref={R.prop(key, this.state.remoteVideoList)} autoPlay></video> 
-        </div>
-      ) 
+      if(key !== COMMMON_PEER_CONNECTION){
+        return (
+          <div key={key} className="col-2">
+            <video id="received_video" style={{display: display}} onClick={() => this.handleVideoClick(key)} ref={R.prop(key, this.state.remoteVideoList)} autoPlay></video> 
+          </div>
+        ) 
+      }
+      return null;
     }
 
     startScreenShare = () => {
