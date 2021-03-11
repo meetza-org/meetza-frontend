@@ -18,6 +18,14 @@ const user = (state = initialState, action) => {
                 userEmailId: action.payload.email,
                 firstName: action.payload.firstName,
             }
+        case USER.LOGOUT.SUCCESS:{
+            localStorage.removeItem('token');
+            localStorage.removeItem('userData');
+            return {
+                ...state,
+                isUserLoggedIn: false,
+            }
+        }
         default:{
             return state;
         }

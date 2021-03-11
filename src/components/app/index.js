@@ -48,10 +48,10 @@ class App extends Component {
   }
 
   render() {
-    const {isUserLoggedIn} = this.props;
+    const {isUserLoggedIn, logout} = this.props;
     return (
       <AppWrapper className="App">
-        <Header></Header>
+        <Header logout={logout} isUserLoggedIn={isUserLoggedIn}></Header>
         <Switch>
           <Route exact path='/login' component={Login} />
           <Route exact path='/register' component={Register} />
