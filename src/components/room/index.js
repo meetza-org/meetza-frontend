@@ -361,11 +361,14 @@ export default class Main extends Component{
       this.myPeerConnections[emailId].onicecandidate = this.handleICECandidateEvent;
       this.myPeerConnections[emailId].ontrack = event => this.handleTrackEvent(emailId, event);
       this.myPeerConnections[emailId].onnegotiationneeded = () => this.handleNegotiationNeededEvent(emailId);
+      //this.myPeerConnections[emailId].connectionstatechange = () => console.log(this.myPeerConnections[emailId])
       //this.myPeerConnections[emailId].onremovetrack = event => this.handleRemoveTrackEvent(emailId, event);
       //this.myPeerConnections[emailId].oniceconnectionstatechange = this.handleICEConnectionStateChangeEvent;
       //this.myPeerConnections[emailId].onicegatheringstatechange = this.handleICEGatheringStateChangeEvent;
       //this.myPeerConnections[emailId].onsignalingstatechange = this.handleSignalingStateChangeEvent;
-      this.localStream.getTracks().forEach(track => this.myPeerConnections[emailId].addTrack(track, this.localStream));
+      this.localStream.getTracks().forEach(track => {
+        this.myPeerConnections[emailId].sender = this.myPeerConnections[emailId].addTrack(track, this.localStream);
+      });
       remoteVideoList[emailId] = React.createRef()
       this.setState({
         remoteVideoList: remoteVideoList
@@ -396,6 +399,9 @@ export default class Main extends Component{
       this.myPeerConnections[emailId].setRemoteDescription(desc)
       .catch(() => console.log("!!!!!!!!!!!!!!!!! VIDEO ANSWER ERROR !!!!!!!!!!!!!!!!!!!!!"));
       console.log("############### Video Answer Room Complete ######################");
+      console.log("################# Final Peer ##################################");
+      console.log(this.myPeerConnections[emailId]);
+      console.log("################# Final Peer ##################################");
     }
 
     handleVideoOfferMsg = ({emailId, sdp }) => {
@@ -587,22 +593,19 @@ export default class Main extends Component{
     }
 
     handleMuteUnmute = kind => {
-      let {mediaConstraints, remoteVideoList} = this.state;
+      let {mediaConstraints} = this.state;
       mediaConstraints[kind] = !mediaConstraints[kind];
-      if(kind === "video" && mediaConstraints[kind] === false){
+      if(this.localStream){
+        this.localStream.getTracks().forEach(track => {
+          if(track.kind === kind){
+            track.enabled = mediaConstraints[kind] 
+          }
+        });
         if (this.localVideoSrc.current.srcObject) {
-          this.localVideoSrc.current.srcObject.getTracks().forEach(track => track.stop());
-          this.localVideoSrc = React.createRef();
+          this.localVideoSrc.current.srcObject = this.localStream;
+          this.localStream.getTracks().forEach(t => R.map(key => this.myPeerConnections[key].sender.replaceTrack(t).catch(e => console.log(e)), R.keys(this.myPeerConnections))); 
         }
       }
-      navigator.mediaDevices.getUserMedia(mediaConstraints)
-      .then(localStream => {
-          this.localVideoSrc.current.srcObject = localStream;
-          localStream.getTracks().forEach(track => R.map(key => this.myPeerConnections[key].addTrack(track, localStream), R.keys(this.myPeerConnections)));
-      })
-      .catch(err => {
-        console.log(err)
-      });
       this.setState({mediaConstraints: mediaConstraints});
     }
 
