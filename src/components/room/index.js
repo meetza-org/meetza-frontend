@@ -1,7 +1,7 @@
 import React, { Component, Fragment } from 'react';
 import styled from 'styled-components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faPhoneSlash, faMicrophone, faMicrophoneSlash, faVideo, faVideoSlash } from '@fortawesome/free-solid-svg-icons';
+import { faPhoneSlash, faMicrophone, faMicrophoneSlash, faVideo, faVideoSlash, faDesktop } from '@fortawesome/free-solid-svg-icons';
 import * as R from 'ramda';
 import { Spinner } from '../common'
 import NotificationSystem from 'react-notification-system';
@@ -9,11 +9,11 @@ import NotificationSystem from 'react-notification-system';
 const style = {
   NotificationItem: { // Override the notification item
     DefaultStyle: { // Applied to every notification, regardless of the notification level
-      height: 115,
+      height: 130,
       fontSize: '15px',
       backgroundColor: 'rgb(248 255 254)',
       boxShadow: 'rgb(54 156 199 / 90%) 0px 0px 4px 0px',
-    },
+    }
   }
 }
  
@@ -121,6 +121,10 @@ margin-top: 20px;
       color: #607f94;
     }
   }
+
+  .notification-message{
+    min-height: 35px;
+  }
 `;
 
 const ButtonStyle = styled.div`
@@ -175,15 +179,26 @@ const VideoButton = ({onClick, isMuted}) =>
     <FontAwesomeIcon icon={isMuted ? faVideoSlash : faVideo} />
   </AudioVideoButtonStyle>  
 
-const ActionButtons = ({handleMuteUnmute, mediaConstraints, closeVideoCall, showHangup}) => {
+const ShareScreenButton = ({onClick, isMuted}) =>
+<AudioVideoButtonStyle onClick={onClick} isMuted={isMuted}>
+  <FontAwesomeIcon icon={faDesktop} />
+</AudioVideoButtonStyle>  
+
+
+
+const ActionButtons = ({handleMuteUnmute, mediaConstraints, closeVideoCall, showHangup, handleScreenShare, isScreenShared}) => {
+  debugger;
   return (
     <div className="inline-flex">
       <AudioButton onClick={() => handleMuteUnmute("audio")} isMuted={!mediaConstraints.audio}></AudioButton>
       <VideoButton onClick={() => handleMuteUnmute("video")} isMuted={!mediaConstraints.video}></VideoButton>
       {showHangup ? (
+        <>
+        <ShareScreenButton onClick={handleScreenShare} isMuted={isScreenShared} />
         <div className="leave-button" id="hangup-button" onClick={closeVideoCall}>
           <FontAwesomeIcon icon={faPhoneSlash} onClick={closeVideoCall} />
         </div>
+        </>
       ) : null}
     </div> 
   )
@@ -239,6 +254,7 @@ export default class Main extends Component{
                 video: true // ...and we want a video track
             },
             remoteVideoList: {},
+            isScreenShared: false,
         }
         this.videoOffer = null;
         this.videoAnswer = null;
@@ -252,6 +268,7 @@ export default class Main extends Component{
         this.newJoinee = null;
         this.acceptOrReject=null;
         this.isMeetingClosed=false;
+        this.screenCaptureStream=null;
     }
 
     componentDidMount(){
@@ -625,8 +642,41 @@ export default class Main extends Component{
       ) 
     }
 
+    startScreenShare = () => {
+      navigator.mediaDevices.getDisplayMedia({
+        cursor: 'always',
+      })
+      .then(localStream => {
+        this.screenCaptureStream = localStream;
+        debugger;
+        this.screenCaptureStream.oninactive = this.stopScreenShare;
+        this.screenCaptureStream.getTracks().forEach(t => R.map(key => this.myPeerConnections[key].sender.replaceTrack(t).catch(e => console.log(e)), R.keys(this.myPeerConnections))); 
+      })
+      .catch(this.handleGetUserMediaError);
+    }
+
+    stopScreenShare = () => {
+      if(this.screenCaptureStream != null){
+        this.screenCaptureStream.getTracks().forEach(t => t.stop());
+        this.screenCaptureStream = null;
+        this.setState({isScreenShared: false});
+        this.localStream.getVideoTracks().forEach(t => R.map(key => this.myPeerConnections[key].sender.replaceTrack(t).catch(e => console.log(e)), R.keys(this.myPeerConnections)));  
+      }
+    }
+
+    handleScreenShare = () => {
+      let {isScreenShared} = this.state;
+      isScreenShared = !isScreenShared;
+      if(isScreenShared === true){
+        this.startScreenShare();
+      }else{
+        this.stopScreenShare()
+      }
+      this.setState({isScreenShared});
+    }
+
     render(){
-        const {mediaConstraints, loader, isHost, isMeetingStarted} = this.state;
+        const {mediaConstraints, loader, isHost, isMeetingStarted, isScreenShared} = this.state;
         return(
             <Fragment>
                 <MainStyle>
@@ -641,14 +691,14 @@ export default class Main extends Component{
                         </div>
                         <div className="row">
                           <div className="col-2">
-                            <video id="local_video" ref={this.localVideoSrc} src={this.state.localVideoSrc} autoPlay muted></video>
+                            <video id="local_video" ref={this.localVideoSrc} autoPlay muted></video>
                           </div>
                           { !R.isEmpty(this.state.remoteVideoList) ? R.map(this.handleVideoListDisplay, R.keys(this.state.remoteVideoList)) : null }
                         </div>
                         <div className="row bottom-row">
                           <div className="col"></div>
                           <div className="col-12 col-md-6">
-                            <ActionButtons showHangup={true} handleMuteUnmute={this.handleMuteUnmute} mediaConstraints={mediaConstraints} closeVideoCall={this.closeVideoCall}></ActionButtons>                       
+                            <ActionButtons handleScreenShare={this.handleScreenShare} isScreenShared={isScreenShared} showHangup={true} handleMuteUnmute={this.handleMuteUnmute} mediaConstraints={mediaConstraints} closeVideoCall={this.closeVideoCall}></ActionButtons>                       
                           </div>
                           <div className="col"></div>
                         </div>
@@ -680,12 +730,12 @@ export default class Main extends Component{
                               <div className="col-9">
                                 <div className="row">
                                   <div className="col-12 col-md-6">
-                                    <video id="local_video" ref={this.localVideoSrc} src={this.state.localVideoSrc} autoPlay muted></video>
+                                    <video id="local_video" ref={this.localVideoSrc} autoPlay muted></video>
                                   </div>
                                 </div>
                                 <div className="row">
                                   <div className="col-12 col-md-6">
-                                    <ActionButtons showHangup={false} handleMuteUnmute={this.handleMuteUnmute} mediaConstraints={mediaConstraints} closeVideoCall={this.closeVideoCall}></ActionButtons>                       
+                                    <ActionButtons showHangup={false} handleMuteUnmute={this.handleMuteUnmute} mediaConstraints={mediaConstraints}></ActionButtons>                       
                                   </div>
                                 </div>
                               </div>
