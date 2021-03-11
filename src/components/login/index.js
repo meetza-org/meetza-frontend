@@ -4,7 +4,6 @@ import {Link, withRouter} from 'react-router-dom'
 
 const LoginStyle = styled.div`
     padding: 25px 20px;
-    width: 400px !important;
     margin-top: 30px;
 `;
 
@@ -68,13 +67,21 @@ class Login extends Component{
         return(
             <LoginStyle className="container">
                 <form method="post" onSubmit={this.login}>
-                    <div className="form-group">
-                        <label htmlFor="exampleInputEmail1">Email address</label>
-                        <input type="text" name="email" onChange={this.handleChange} className="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" required />
+                    <div className="row form-group">
+                        <div className="col-12 col-sm-9">
+                            <label htmlFor="exampleInputEmail1">Email address</label> 
+                        </div>
+                        <div className="col-12 col-sm-4">
+                            <input type="text" name="email" onChange={this.handleChange} className="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" required />
+                        </div>
                     </div>
-                    <div className="form-group">
-                        <label htmlFor="exampleInputPassword1">Password</label>
-                        <input type="password" name="password" onChange={this.handleChange} className="form-control" id="exampleInputPassword1" required /> 
+                    <div className="row form-group">
+                        <div className="col-12 col-sm-9">
+                            <label htmlFor="exampleInputPassword1">Password</label>
+                        </div>
+                        <div className="col-12 col-sm-4">
+                            <input type="password" name="password" onChange={this.handleChange} className="form-control" id="exampleInputPassword1" required /> 
+                        </div>
                     </div>
                     {this.state.isError ? (
                         <ErrorStyle className="form-group">

@@ -42,7 +42,7 @@ const HeaderStyle = styled.div`
 export default class Header extends Component{
     clearDataAndRedirectToLogin = () => {
         this.props.logout();
-        window.location.href = "/login";
+        window.location.href = "/";
     }
 
     login = () => {
@@ -55,14 +55,14 @@ export default class Header extends Component{
                 <div className="col-1">
                     <Link className="navbar-brand logo" to="/">Meetza</Link>
                 </div>
-                <div className="col-9"></div>
-                <div className="col-2 github-link">
+                <div className="col-2 col-sm-9"></div>
+                <div className="col-6 col-sm-2 github-link">
                     <a href="https://github.com/meetza-org" target="_blank" rel="noopener noreferrer">
                         <img src="/images/GitHub-Mark-120px-plus.png" alt="Github URL" />
                     </a>
                     {this.props.isUserLoggedIn ? (
                         <div className="logout-button" onClick={this.clearDataAndRedirectToLogin}>Logout</div>
-                    ): (window.location.pathname !== "/login" ? <div className="logout-button" onClick={this.login}>Login</div> : null)}
+                    ): (window.location.pathname !== "/login" ? <div className="logout-button" onClick={this.login}>Sign In</div> : null)}
                 </div>
                     
             </HeaderStyle>

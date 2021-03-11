@@ -20,7 +20,7 @@ const style = {
 }
  
 const MainStyle = styled.div`
-margin-top: 20px;
+margin-top: 25px;
 
 .row{
     margin-top: 10px;
@@ -30,21 +30,9 @@ margin-top: 20px;
   position: fixed;
   bottom: 1rem;
   width: 100%;
-}
-
-.leave-button{
-    display: inline-flex;
-    background-image: linear-gradient(45deg,#ff6c44,#ff0000);
-    padding: 12px;
-    border-radius: 50%;
-    cursor: pointer;
-    height: 50px;
-    width: 50px;
-    color: white;
-
-    svg{
-      margin: auto;
-    }
+  @media (max-width: 575.98px) { 
+    bottom: 3rem;
+  }
 }
 
 .join-button{
@@ -77,12 +65,29 @@ margin-top: 20px;
 
 #received_video {
     width: 100%;
-    max-height: 350px;
+    
+    @media (min-width: 576px) { 
+      max-height: 350px;
+    }
+
+    @media (max-width: 575.98px) { 
+      height: 100vh
+    }
   }
 
-  #local_video {
-    width: 100%;
+  .local-video-join{
     box-shadow: 0 0 7px 0px #1853bf;
+    width: 100%;
+    @media (max-width: 575.98px) { 
+      position: fixed;
+      bottom: 3rem;
+      width: 30%;
+    }
+  }
+
+  .local_video {
+    box-shadow: 0 0 7px 0px #1853bf;
+    width: 100%;
   }
   
   #hangup-button:disabled {
@@ -101,10 +106,27 @@ margin-top: 20px;
     width: 100%;
   }
 
+  .inline-flex-actions{
+    display: inline-flex;
+    justify-content: center;
+    width: 100%;
+    @media (max-width: 575.98px) { 
+      position: fixed;
+      bottom: 3rem;
+      width: 30%;
+      right: 1rem;
+      display: block;
+    }
+    
+  }
+
   .main-text{
     font-size: 24px;
     font-style: italic;
     color: #3a475a
+    @media (max-width: 575.98px) { 
+      font-size: 18px;
+    }
   }
 
   .waiting-message{
@@ -127,6 +149,10 @@ margin-top: 20px;
   .notification-message{
     min-height: 35px;
   }
+
+  .notifications-tr {
+    right: 1rem !important;
+  }
 `;
 
 const ButtonStyle = styled.div`
@@ -139,6 +165,10 @@ const ButtonStyle = styled.div`
   color: white;
   background-color: white;
   margin-right: 5px;
+
+  @media (max-width: 575.98px) { 
+    margin-bottom: 5px;
+  }
 
   svg{
     margin: auto;
@@ -171,34 +201,40 @@ const RejectButton = styled(ActionButton)`
   color: #2183ff;
 `;
 
+const HangupStyle = styled(ButtonStyle)`
+  background-image: linear-gradient(45deg,#ff6c44,#ff0000);
+`;
+
 const AudioButton = ({onClick, isMuted}) => 
-  <AudioVideoButtonStyle onClick={onClick} isMuted={isMuted}>
-    <FontAwesomeIcon icon={isMuted ? faMicrophoneSlash : faMicrophone} />
+  <AudioVideoButtonStyle isMuted={isMuted}>
+    <FontAwesomeIcon onClick={onClick} icon={isMuted ? faMicrophoneSlash : faMicrophone} />
   </AudioVideoButtonStyle>
 
 const VideoButton = ({onClick, isMuted}) =>
-  <AudioVideoButtonStyle onClick={onClick} isMuted={isMuted}>
-    <FontAwesomeIcon icon={isMuted ? faVideoSlash : faVideo} />
+  <AudioVideoButtonStyle isMuted={isMuted}>
+    <FontAwesomeIcon onClick={onClick} icon={isMuted ? faVideoSlash : faVideo} />
   </AudioVideoButtonStyle>  
 
 const ShareScreenButton = ({onClick, isMuted}) =>
-<AudioVideoButtonStyle onClick={onClick} isMuted={isMuted}>
-  <FontAwesomeIcon icon={faDesktop} />
+<AudioVideoButtonStyle isMuted={isMuted}>
+  <FontAwesomeIcon onClick={onClick} icon={faDesktop} />
 </AudioVideoButtonStyle>  
 
+const HangupButton = ({onClick}) => 
+<HangupStyle>
+  <FontAwesomeIcon onClick={onClick} icon={faPhoneSlash} />
+</HangupStyle>  
 
 
 const ActionButtons = ({handleMuteUnmute, mediaConstraints, closeVideoCall, showHangup, handleScreenShare, isScreenShared}) => {
   return (
-    <div className="inline-flex">
+    <div className={showHangup ? "inline-flex-actions" : "inline-flex"}>
       <AudioButton onClick={() => handleMuteUnmute("audio")} isMuted={!mediaConstraints.audio}></AudioButton>
       <VideoButton onClick={() => handleMuteUnmute("video")} isMuted={!mediaConstraints.video}></VideoButton>
       {showHangup ? (
         <>
         <ShareScreenButton onClick={handleScreenShare} isMuted={isScreenShared} />
-        <div className="leave-button" id="hangup-button" onClick={closeVideoCall}>
-          <FontAwesomeIcon icon={faPhoneSlash} onClick={closeVideoCall} />
-        </div>
+        <HangupButton onClick={closeVideoCall} />
         </>
       ) : null}
     </div> 
@@ -512,7 +548,6 @@ export default class Main extends Component{
             alert("Error opening your camera and/or microphone: " + e.message);
             break;
         }
-        this.closeVideoCall();
     }
 
     closeVideoCall = () => {   
@@ -523,7 +558,8 @@ export default class Main extends Component{
       }
       this.myPeerConnections = {};
       this.setState({
-        remoteVideoList: {}
+        remoteVideoList: {},
+        isJoined: false,
       });
       if(this.state.isHost){
         this.props.sendSignal({
@@ -553,8 +589,6 @@ export default class Main extends Component{
         this.myPeerConnections[emailId].close();
         this.myPeerConnections[emailId] = null;
       }
-      
-      this.setState({isJoined: false})
     }
 
     componentDidUpdate(prevProps){
@@ -686,14 +720,14 @@ export default class Main extends Component{
                       <div className="container-fluid">
                         <div className="row" id="camera-container">
                           <div className="col"></div>
-                          <div className="col-6 remote-video-bg">
+                          <div className="col-12 col-sm-6 remote-video-bg">
                               <video id="received_video" ref={this.primaryRemoteVideoSrc} autoPlay></video>
                           </div>
                           <div className="col"></div>
                         </div>
                         <div className="row">
                           <div className="col-2">
-                            <video id="local_video" ref={this.localVideoSrc} autoPlay muted></video>
+                            <video className="local-video-join" id="local_video" ref={this.localVideoSrc} autoPlay muted></video>
                           </div>
                           { !R.isEmpty(this.state.remoteVideoList) ? R.map(this.handleVideoListDisplay, R.keys(this.state.remoteVideoList)) : null }
                         </div>
@@ -713,12 +747,7 @@ export default class Main extends Component{
                               </div>
                             </div>
                             <div className="row">
-                              <div className="col-12 main-text">
-                                We need to access your camera and mic for the video conferencing to work so kindly click on ok when the browser asks you for permission.
-                              </div>
-                            </div>
-                            <div className="row">
-                              <div className="col-3">
+                              <div className="col-12 col-sm-3">
                                 <div className="row">
                                   <div className="col-4">
                                     {loader ? <MeetingFactory acceptOrReject={this.props.acceptOrReject} isWaiting={this.props.isWaiting} isHost={isHost} isMeetingStarted={this.props.isMeetingStarted} startMeeting={this.startMeeting} requestToJoin={this.requestToJoin} /> : (
@@ -729,10 +758,10 @@ export default class Main extends Component{
                                   </div>
                                 </div>
                               </div>
-                              <div className="col-9">
+                              <div className="col-12 col-sm-9">
                                 <div className="row">
                                   <div className="col-12 col-md-6">
-                                    <video id="local_video" ref={this.localVideoSrc} autoPlay muted></video>
+                                    <video className="local_video" id="local_video" ref={this.localVideoSrc} autoPlay muted></video>
                                   </div>
                                 </div>
                                 <div className="row">

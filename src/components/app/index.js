@@ -6,6 +6,7 @@ import Login from '../../containers/login';
 import Register from '../../containers/register';
 import Main from '../../containers/main';
 import Room from '../../containers/room';
+import Home from '../home';
 import { createWebSocketConnection } from '../../helpers/socket';
 
 const AppWrapper = styled.div`
@@ -55,8 +56,10 @@ class App extends Component {
         <Switch>
           <Route exact path='/login' component={Login} />
           <Route exact path='/register' component={Register} />
-
-          <PrivateRoute isLoggedIn={isUserLoggedIn} exact path='/' component={Main} />
+          <Route exact path='/' render={
+            props => isUserLoggedIn ? <Redirect to={{pathname: '/main'}} {...props} /> : <Home {...props} />
+          }/>
+          <PrivateRoute isLoggedIn={isUserLoggedIn} exact path='/main' component={Main} />
           <PrivateRoute isLoggedIn={isUserLoggedIn} exact path='/room/:roomId' component={Room} />
         </Switch>
       </AppWrapper>

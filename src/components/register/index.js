@@ -4,7 +4,6 @@ import {Link} from 'react-router-dom'
 
 const RegisterStyle = styled.div`
     padding: 25px 20px;
-    width: 400px !important;
     margin-top: 30px;
 `;
 
@@ -58,20 +57,32 @@ export default class Register extends Component{
         return(
             <RegisterStyle className="container">
                 <form method="post" onSubmit={this.register}>
-                    <div className="form-group">
-                        <label>Email address</label>
-                        <input type="email" name="email" onChange={this.handleChange} className="form-control" required />
+                    <div className="row form-group">
+                        <div className="col-12 col-sm-9">
+                            <label>Email address</label>
+                        </div>
+                        <div className="col-12 col-sm-4">
+                            <input type="email" name="email" onChange={this.handleChange} className="form-control" required />
+                        </div>
                     </div>
-                    <div className="form-group">
-                        <label>Name</label>
-                        <input type="text" name="firstName" onChange={this.handleChange} className="form-control" required />
+                    <div className="row form-group">
+                        <div className="col-12 col-sm-9">
+                            <label>Name</label>
+                        </div>
+                        <div className="col-12 col-sm-4">
+                            <input type="text" name="firstName" onChange={this.handleChange} className="form-control" required />
+                        </div>
                     </div>
-                    <div className="form-group">
-                        <label>Password</label>
-                        <input type="password" name="password" onChange={this.handleChange} className="form-control" required /> 
+                    <div className="row form-group">
+                        <div className="col-12 col-sm-9">
+                            <label>Password</label>
+                        </div>
+                        <div className="col-12 col-sm-4">
+                            <input type="password" name="password" onChange={this.handleChange} className="form-control" required /> 
+                        </div>
                     </div>
                     {this.state.isError ? (
-                        <ErrorStyle className="form-group">
+                        <ErrorStyle className="row form-group">
                             <label>{this.state.errorMsg}</label>
                         </ErrorStyle>
                     ): null}

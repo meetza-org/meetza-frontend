@@ -27,7 +27,6 @@ export const register = data => ({
     }
 });
 
-export const logout = data => ({
+export const logout = () => ({
     type: USER.LOGOUT.SUCCESS,
-    data: data
 });

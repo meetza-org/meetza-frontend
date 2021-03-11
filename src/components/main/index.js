@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { Spinner } from '../common'
  
 const MainStyle = styled.div`
-    margin-top: 10px;
+    margin-top: 25px;
 
     .row{
         margin-top: 10px;
@@ -25,7 +25,10 @@ const MainStyle = styled.div`
     .main-text{
         font-size: 24px;
         font-style: italic;
-        color: #3a475a
+        color: #3a475a;
+        @media (max-width: 575.98px) { 
+            font-size: 18px;
+        }
     }
 
     .waiting-message{
@@ -75,16 +78,22 @@ export default class Main extends Component{
         return(
             <Fragment>
                 <MainStyle className="container">
-                    <div className="row main-text">{`Hi ${this.props.firstName},`}</div>
-                    <div className="row main-text">Meetza is a free and open source video conferencing application. Click the button below to start a meeting and share the link with people to join.</div>
+                    <div className="row main-text"><div className="col-12">{`Hi ${this.props.firstName},`}</div></div>
+                    <div className="row main-text">
+                        <div className="col-12">
+                            Welcome to Meetza - a free and open source video conferencing application. Click the button below to host a meeting and share the link with people to join.
+                        </div>
+                    </div>
                     <div className="row">
-                        {this.state.loader ? (
-                            <div className="waiting-message">
-                                <Spinner />
-                            </div>
-                        ) : (
-                            <div className="start-button" onClick={this.onStartMeeting}>Host a Meeting</div> 
-                        )}
+                        <div className="col-12">
+                            {this.state.loader ? (
+                                <div className="waiting-message">
+                                    <Spinner />
+                                </div>
+                            ) : (
+                                <div className="start-button" onClick={this.onStartMeeting}>Host a Meeting</div> 
+                            )}
+                        </div>
                     </div>
                 </MainStyle>
             </Fragment>
