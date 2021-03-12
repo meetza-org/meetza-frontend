@@ -31,7 +31,7 @@ const PrivateRoute = ({ component: Component, ...rest }) => (
   <Route
     {...rest}
     render={ 
-      props => rest.isLoggedIn ? <Component {...props} /> : <Redirect to={{pathname: '/login', state: { from: props.location }}} />
+      props => rest.isLoggedIn ? <Component {...props} /> : <Redirect to={{pathname: '/', state: { from: props.location }}} />
     }
   />
 );
@@ -51,7 +51,7 @@ class App extends Component {
   render() {
     const {isUserLoggedIn, logout} = this.props;
     return (
-      <AppWrapper className="App">
+      <AppWrapper className="container App">
         <Header logout={logout} isUserLoggedIn={isUserLoggedIn}></Header>
         <Switch>
           <Route exact path='/login' component={Login} />

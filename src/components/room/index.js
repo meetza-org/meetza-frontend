@@ -20,8 +20,6 @@ const style = {
 }
  
 const MainStyle = styled.div`
-margin-top: 25px;
-
 .row{
     margin-top: 10px;
 }
@@ -71,13 +69,15 @@ margin-top: 25px;
     }
 
     @media (max-width: 575.98px) { 
-      height: 100vh
+      height: ${props => props.screenHeight - 70}px;
     }
   }
 
   .local-video-join{
     box-shadow: 0 0 7px 0px #1853bf;
     width: 100%;
+    -webkit-transform: scaleX(-1);
+    transform: scaleX(-1);
     @media (max-width: 575.98px) { 
       position: fixed;
       bottom: 3rem;
@@ -88,6 +88,8 @@ margin-top: 25px;
   .local_video {
     box-shadow: 0 0 7px 0px #1853bf;
     width: 100%;
+    -webkit-transform: scaleX(-1);
+    transform: scaleX(-1);
   }
   
   #hangup-button:disabled {
@@ -113,7 +115,7 @@ margin-top: 25px;
     @media (max-width: 575.98px) { 
       position: fixed;
       bottom: 3rem;
-      width: 30%;
+      width: 31%;
       right: 1rem;
       display: block;
     }
@@ -713,11 +715,12 @@ export default class Main extends Component{
 
     render(){
         const {mediaConstraints, loader, isHost, isMeetingStarted, isScreenShared} = this.state;
+        const {height, width} = window.screen
         return(
             <Fragment>
-                <MainStyle>
+                <MainStyle screenHeight={height} screenWidth={width}>
                     {this.state.isJoined ? (
-                      <div className="container-fluid">
+                      <div className="">
                         <div className="row" id="camera-container">
                           <div className="col"></div>
                           <div className="col-12 col-sm-6 remote-video-bg">

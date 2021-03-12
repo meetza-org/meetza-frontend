@@ -32,7 +32,7 @@ export default class Home extends Component{
                 <MainStyle className="container">
                     <div className="row">
                         <div className="col-12 col-sm-4 main-text">
-                            Meetza is a free and open source video conferencing application. Sign in and get started in within seconds.
+                            Meetza is a free and open source video conferencing application. Sign in and get started within seconds.
                         </div>
                         <div className="col-12 col-sm-8">
                             <img src="images/video-conference.png" alt="Video Conferencing"></img>
