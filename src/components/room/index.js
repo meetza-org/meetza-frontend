@@ -413,9 +413,9 @@ export default class Main extends Component{
             }
           ]
       });
-      this.localStream.getTracks().forEach(track => {
-        this.myPeerConnections[emailId].sender = this.myPeerConnections[emailId].addTrack(track, this.localStream);
-      });
+      // this.localStream.getTracks().forEach(track => {
+      //   this.myPeerConnections[emailId].sender = this.myPeerConnections[emailId].addTrack(track, this.localStream);
+      // });
       this.addPeerConnectionEvents(emailId);
     }
 
@@ -429,6 +429,14 @@ export default class Main extends Component{
       //this.myPeerConnections[emailId].oniceconnectionstatechange = this.handleICEConnectionStateChangeEvent;
       //this.myPeerConnections[emailId].onicegatheringstatechange = this.handleICEGatheringStateChangeEvent;
       //this.myPeerConnections[emailId].onsignalingstatechange = this.handleSignalingStateChangeEvent;
+      if(this.myPeerConnections[emailId].sender != null){
+        this.localStream.getTracks().forEach(t => this.myPeerConnections[emailId].sender.replaceTrack(t).catch(e => console.log(e))); 
+      }
+      else{
+        this.localStream.getTracks().forEach(track => {
+          this.myPeerConnections[emailId].sender = this.myPeerConnections[emailId].addTrack(track, this.localStream);
+        });
+      }
       remoteVideoList[emailId] = React.createRef()
       this.setState({
         remoteVideoList: remoteVideoList
