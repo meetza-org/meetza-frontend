@@ -1,12 +1,10 @@
 import React, { Component, Fragment } from 'react';
 import styled from 'styled-components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faPhoneSlash, faMicrophone, faMicrophoneSlash, faVideo, faVideoSlash, faDesktop } from '@fortawesome/free-solid-svg-icons';
+import { faPhoneSlash, faMicrophone, faMicrophoneSlash, faVideo, faVideoSlash, faDesktop, faExpand, faCompress } from '@fortawesome/free-solid-svg-icons';
 import * as R from 'ramda';
 import { Spinner } from '../common'
 import NotificationSystem from 'react-notification-system';
-
-const COMMMON_PEER_CONNECTION = "__common__";
 
 const style = {
   NotificationItem: { // Override the notification item
@@ -76,6 +74,7 @@ const MainStyle = styled.div`
   .local-video-join{
     box-shadow: 0 0 7px 0px #1853bf;
     width: 100%;
+    cursor:pointer;
     -webkit-transform: scaleX(-1);
     transform: scaleX(-1);
     @media (max-width: 575.98px) { 
@@ -154,6 +153,16 @@ const MainStyle = styled.div`
 
   .notifications-tr {
     right: 1rem !important;
+  }
+
+  .fullscreen-icon{
+    cursor: pointer;
+    color: #e6e6e6;
+    svg {
+      position: absolute;
+      right: 0.5rem;
+      top: 0.5rem;
+    }
   }
 `;
 
@@ -294,6 +303,7 @@ export default class Main extends Component{
             },
             remoteVideoList: {},
             isScreenShared: false,
+            primaryVideoEmail: null,
         }
         this.videoOffer = null;
         this.videoAnswer = null;
@@ -423,7 +433,7 @@ export default class Main extends Component{
       let {remoteVideoList} = this.state;
       this.myPeerConnections[emailId].onicecandidate = this.handleICECandidateEvent;
       this.myPeerConnections[emailId].ontrack = event => this.handleTrackEvent(emailId, event);
-      this.myPeerConnections[emailId].onnegotiationneeded = () => this.handleNegotiationNeededEvent(emailId);
+      //this.myPeerConnections[emailId].onnegotiationneeded = () => this.handleNegotiationNeededEvent(emailId);
       //this.myPeerConnections[emailId].connectionstatechange = () => console.log(this.myPeerConnections[emailId])
       //this.myPeerConnections[emailId].onremovetrack = event => this.handleRemoveTrackEvent(emailId, event);
       //this.myPeerConnections[emailId].oniceconnectionstatechange = this.handleICEConnectionStateChangeEvent;
@@ -445,7 +455,6 @@ export default class Main extends Component{
 
     handleInvitationAccepted = () => {
       const { roomId } = this.state;
-      this.createPeerConnection(COMMMON_PEER_CONNECTION);
       this.props.sendSignal({
         roomId: roomId,
         type: "join-room",
@@ -458,8 +467,6 @@ export default class Main extends Component{
 
     handleVideoAnswerMsg = ({emailId, sdp}) => {   
       console.log("############### Video Answer Room ######################");
-      this.myPeerConnections[emailId] = this.myPeerConnections[COMMMON_PEER_CONNECTION];
-      this.addPeerConnectionEvents(emailId);
       var desc = new RTCSessionDescription(sdp);
       this.myPeerConnections[emailId].setRemoteDescription(desc)
       .catch(() => console.log("!!!!!!!!!!!!!!!!! VIDEO ANSWER ERROR !!!!!!!!!!!!!!!!!!!!!"));
@@ -486,6 +493,9 @@ export default class Main extends Component{
         });
       })
       .catch(this.handleGetUserMediaError);
+      console.log("################# Final Peer ##################################");
+      console.log(this.myPeerConnections[emailId]);
+      console.log("################# Final Peer ##################################");
     }
 
     handleNewICECandidateMsg = ({emailId, candidate}) => {
@@ -511,7 +521,6 @@ export default class Main extends Component{
 
     handleTrackEvent = (emailId, event) => {
       let {remoteVideoList} = this.state;
-      debugger;
       if(remoteVideoList[emailId].current != null){
         remoteVideoList[emailId].current.srcObject = event.streams[0];
         this.setState({
@@ -642,7 +651,22 @@ export default class Main extends Component{
       }
     }
 
-    handleNewJoinee = ({firstName}) => {
+    handleNewJoinee = ({firstName, emailId}) => {
+      const { roomId } = this.state;
+      this.createPeerConnection(emailId);
+      this.myPeerConnections[emailId].createOffer()
+      .then(offer => this.myPeerConnections[emailId].setLocalDescription(offer))
+      .then(() => {
+          this.props.sendSignal({
+              roomId: roomId,
+              type: "video-offer",
+              sdp: this.myPeerConnections[emailId].localDescription,
+              emailId: this.props.userEmailId,
+              to: emailId,
+            })
+      })
+      .catch(() => console.log('Error Occured'));
+
       const notification = this.notificationSystem.current;
       notification.addNotification({
         title: "New Entry",
@@ -670,7 +694,9 @@ export default class Main extends Component{
     }
 
     handleVideoClick = emailId => {
-      this.primaryRemoteVideoSrc.current.srcObject = this.state.remoteVideoList[emailId];
+      this.primaryRemoteVideoSrc.current.name = emailId;
+      this.primaryRemoteVideoSrc.current.srcObject = this.state.remoteVideoList[emailId].current.srcObject;
+      this.setState({primaryVideoEmail: emailId})
     }
 
     handleVideoListDisplay = key => {
@@ -678,14 +704,11 @@ export default class Main extends Component{
       if(this.primaryRemoteVideoSrc.current && this.primaryRemoteVideoSrc.current.name === key){
         display = "none";
       }
-      if(key !== COMMMON_PEER_CONNECTION){
-        return (
-          <div key={key} className="col-2">
-            <video id="received_video" style={{display: display}} onClick={() => this.handleVideoClick(key)} ref={R.prop(key, this.state.remoteVideoList)} autoPlay></video> 
-          </div>
-        ) 
-      }
-      return null;
+      return (
+        <div key={key} style={{display: display}} className="col-2">
+          <video id="received_video" className="local-video-join" style={{display: display}} onClick={() => this.handleVideoClick(key)} ref={R.prop(key, this.state.remoteVideoList)} autoPlay></video> 
+        </div>
+      )
     }
 
     startScreenShare = () => {
@@ -721,8 +744,18 @@ export default class Main extends Component{
       this.setState({isScreenShared});
     }
 
+    handleFullScreen = () => {
+      if (this.primaryRemoteVideoSrc.current.requestFullscreen) {
+        this.primaryRemoteVideoSrc.current.requestFullscreen();
+      } else if (this.primaryRemoteVideoSrc.current.webkitRequestFullscreen) { /* Safari */
+        this.primaryRemoteVideoSrc.current.webkitRequestFullscreen();
+      } else if (this.primaryRemoteVideoSrc.current.msRequestFullscreen) { /* IE11 */
+        this.primaryRemoteVideoSrc.current.msRequestFullscreen();
+      }
+    }
+
     render(){
-        const {mediaConstraints, loader, isHost, isMeetingStarted, isScreenShared} = this.state;
+        const {mediaConstraints, loader, isHost, isMeetingStarted, isScreenShared } = this.state;
         const {height, width} = window.screen
         return(
             <Fragment>
@@ -732,6 +765,9 @@ export default class Main extends Component{
                         <div className="row" id="camera-container">
                           <div className="col"></div>
                           <div className="col-12 col-sm-6 remote-video-bg">
+                              <div className="fullscreen-icon" onClick={this.handleFullScreen}>
+                                <FontAwesomeIcon icon={ faExpand } />
+                              </div>
                               <video id="received_video" ref={this.primaryRemoteVideoSrc} autoPlay></video>
                           </div>
                           <div className="col"></div>
