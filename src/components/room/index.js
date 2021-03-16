@@ -469,7 +469,10 @@ export default class Main extends Component{
       console.log("############### Video Answer Room ######################");
       var desc = new RTCSessionDescription(sdp);
       this.myPeerConnections[emailId].setRemoteDescription(desc)
-      .catch(() => console.log("!!!!!!!!!!!!!!!!! VIDEO ANSWER ERROR !!!!!!!!!!!!!!!!!!!!!"));
+      .catch(err => {
+        console.log(err);
+        console.log("!!!!!!!!!!!!!!!!! VIDEO ANSWER ERROR !!!!!!!!!!!!!!!!!!!!!");
+      });
       console.log("############### Video Answer Room Complete ######################");
       console.log("################# Final Peer ##################################");
       console.log(this.myPeerConnections[emailId]);
