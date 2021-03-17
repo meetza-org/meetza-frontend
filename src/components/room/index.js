@@ -61,7 +61,8 @@ const MainStyle = styled.div`
 
 #received_video {
     width: 100%;
-    
+    -webkit-transform: scaleX(-1);
+    transform: scaleX(-1);
     @media (min-width: 576px) { 
       max-height: 350px;
     }
@@ -158,6 +159,9 @@ const MainStyle = styled.div`
   .fullscreen-icon{
     cursor: pointer;
     color: #e6e6e6;
+    position: absolute;
+    right: 0px;
+    z-index: 10;
     svg {
       position: absolute;
       right: 0.5rem;
@@ -714,8 +718,8 @@ export default class Main extends Component{
         display = "none";
       }
       return (
-        <div key={key} style={{display: display}} className="col-2">
-          <video id="received_video" className="local-video-join" style={{display: display}} onClick={() => this.handleVideoClick(key)} ref={R.prop(key, this.state.remoteVideoList)} autoPlay></video> 
+        <div key={key} style={{display: display}} className="col-4 col-sm-2">
+          <video className="local-video-join" style={{display: display}} onClick={() => this.handleVideoClick(key)} ref={R.prop(key, this.state.remoteVideoList)} autoPlay></video> 
         </div>
       )
     }
@@ -782,7 +786,7 @@ export default class Main extends Component{
                           <div className="col"></div>
                         </div>
                         <div className="row">
-                          <div className="col-2">
+                          <div className="col-4 col-sm-2">
                             <video className="local-video-join" id="local_video" ref={this.localVideoSrc} autoPlay muted></video>
                           </div>
                           { !R.isEmpty(this.state.remoteVideoList) ? R.map(this.handleVideoListDisplay, R.keys(this.state.remoteVideoList)) : null }
