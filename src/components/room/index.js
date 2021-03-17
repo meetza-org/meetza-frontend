@@ -61,8 +61,6 @@ const MainStyle = styled.div`
 
 #received_video {
     width: 100%;
-    -webkit-transform: scaleX(-1);
-    transform: scaleX(-1);
     @media (min-width: 576px) { 
       max-height: 350px;
     }
@@ -76,8 +74,6 @@ const MainStyle = styled.div`
     box-shadow: 0 0 7px 0px #1853bf;
     width: 100%;
     cursor:pointer;
-    -webkit-transform: scaleX(-1);
-    transform: scaleX(-1);
     @media (max-width: 575.98px) { 
       position: fixed;
       bottom: 3rem;
@@ -88,8 +84,6 @@ const MainStyle = styled.div`
   .local_video {
     box-shadow: 0 0 7px 0px #1853bf;
     width: 100%;
-    -webkit-transform: scaleX(-1);
-    transform: scaleX(-1);
   }
   
   #hangup-button:disabled {
