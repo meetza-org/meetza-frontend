@@ -431,7 +431,7 @@ export default class Main extends Component{
 
     addPeerConnectionEvents = emailId => {
       let {remoteVideoList} = this.state;
-      this.myPeerConnections[emailId].onicecandidate = this.handleICECandidateEvent;
+      this.myPeerConnections[emailId].onicecandidate = event => this.handleICECandidateEvent(emailId, event);
       this.myPeerConnections[emailId].ontrack = event => this.handleTrackEvent(emailId, event);
       //this.myPeerConnections[emailId].onnegotiationneeded = () => this.handleNegotiationNeededEvent(emailId);
       //this.myPeerConnections[emailId].connectionstatechange = () => console.log(this.myPeerConnections[emailId])
@@ -467,6 +467,8 @@ export default class Main extends Component{
 
     handleVideoAnswerMsg = ({emailId, sdp}) => {   
       console.log("############### Video Answer Room ######################");
+      console.log(this.myPeerConnections);
+      debugger;
       var desc = new RTCSessionDescription(sdp);
       this.myPeerConnections[emailId].setRemoteDescription(desc)
       .catch(err => {
@@ -475,7 +477,7 @@ export default class Main extends Component{
       });
       console.log("############### Video Answer Room Complete ######################");
       console.log("################# Final Peer ##################################");
-      console.log(this.myPeerConnections[emailId]);
+      console.log(this.myPeerConnections);
       console.log("################# Final Peer ##################################");
     }
 
@@ -492,7 +494,7 @@ export default class Main extends Component{
           type: "video-answer",
           sdp: this.myPeerConnections[emailId].localDescription,
           emailId: this.props.userEmailId,
-          targetEmailId: emailId,
+          to: emailId,
         });
       })
       .catch(this.handleGetUserMediaError);
@@ -507,10 +509,13 @@ export default class Main extends Component{
       console.log(newCandidate);
       console.log("####################### New ICE Candidate ##########################");
       this.myPeerConnections[emailId].addIceCandidate(newCandidate)
-        .catch(() => console.log("!!!!!!!!!!!!!!!!! ICE ERROR !!!!!!!!!!!!!!!!!!!!!"));
+        .catch(err => {
+          console.log(err);
+          console.log("!!!!!!!!!!!!!!!!! ICE ERROR !!!!!!!!!!!!!!!!!!!!!")
+        });
     }
 
-    handleICECandidateEvent = event => {
+    handleICECandidateEvent = (emailId, event) => {
       if (event.candidate) {
         const { roomId } = this.state;
         this.props.sendSignal({
@@ -518,6 +523,7 @@ export default class Main extends Component{
           type: "new-ice-candidate",
           candidate: event.candidate,
           emailId: this.props.userEmailId,
+          to: emailId,
         });
       }
     }
